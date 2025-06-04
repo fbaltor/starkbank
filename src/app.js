@@ -1,4 +1,3 @@
-import { authInternalRequest } from "../auth.js";
 import { sendInvoices } from "./invoiceService.js";
 
 const SERVER_PORT = 8000;
@@ -9,16 +8,6 @@ const serverConfiguration = {
   hostname: SERVER_HOSTNAME,
 };
 
-const INVOICE_ROUTE = "/invoice";
-async function invoiceHandler(req) {
-  if (!(await authInternalRequest(req))) {
-    return new Response("Unauthorized", { status: 403 });
-  }
-
-  await sendInvoices();
-  return new Response("OK");
-}
-
 const INVOICE_WEBHOOK_ROUTE = "/invoice-webhook";
 async function invoiceWebhookHandler(req) {
   await console.log(JSON.stringify(req.body));
@@ -26,10 +15,6 @@ async function invoiceWebhookHandler(req) {
 }
 
 const ROUTES = [
-  {
-    pattern: new URLPattern({ pathname: INVOICE_ROUTE }),
-    handler: invoiceHandler,
-  },
   {
     pattern: new URLPattern({ pathname: INVOICE_WEBHOOK_ROUTE }),
     handler: invoiceWebhookHandler,
@@ -47,5 +32,9 @@ async function handler(req) {
     }
   }
 }
+
+Deno.cron("Trigger invoice creation", { minute: { every: 1 } }, async () => {
+  await sendInvoices();
+});
 
 Deno.serve(serverConfiguration, handler);
