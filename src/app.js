@@ -1,4 +1,5 @@
 import { sendInvoices } from "./invoiceService.js";
+import { createTimePeriodService, createTimePeriod } from "./timeUtils.js";
 
 const SERVER_PORT = 8000;
 const SERVER_HOSTNAME = "localhost";
@@ -33,8 +34,15 @@ async function handler(req) {
   }
 }
 
+const kv = await Deno.openKv();
+const timePeriodService = createTimePeriodService(kv);
+const defaultPeriod = createTimePeriod();
+await timePeriodService.set(defaultPeriod);
+
 Deno.cron("Trigger invoice creation", { minute: { every: 1 } }, async () => {
-  await sendInvoices();
+  if (await timePeriodService.isActive()) {
+    await sendInvoices();
+  }
 });
 
 Deno.serve(serverConfiguration, handler);
