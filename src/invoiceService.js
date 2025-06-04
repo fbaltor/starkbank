@@ -2,8 +2,6 @@ import { initStarkbank } from "./auth.js";
 import { NAMES } from "./names.js";
 import { generate as generateCNPJ } from "@tiagoporto/gerador-validador-cnpj";
 
-const starkbank = await initStarkbank();
-
 function getRandomPersonList(nameArray, min, max) {
   const targetSize = Math.min(
     Math.floor(Math.random() * (max - min + 1)) + min,
@@ -63,9 +61,8 @@ function generateRandomInvoices(min, max) {
 
 const MIN_INVOICES = 8;
 const MAX_INVOICES = 12;
-export async function sendInvoices() {
+export async function sendInvoices(starkbank) {
   const invoiceList = generateRandomInvoices(MIN_INVOICES, MAX_INVOICES);
 
-  const invoices = await starkbank.invoice.create(invoiceList);
-  console.log(invoices);
+  await starkbank.invoice.create(invoiceList);
 }

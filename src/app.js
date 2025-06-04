@@ -1,6 +1,9 @@
 import { sendInvoices } from "./invoiceService.js";
 import { createTimePeriodService, createTimePeriod } from "./timeUtils.js";
-import { isSetTimePeriodAuth } from "./auth.js";
+import { initStarkbank, isSetTimePeriodAuth } from "./auth.js";
+import { createTransfer } from "./transferService.js";
+
+const starkbank = await initStarkbank();
 
 const SERVER_PORT = 8000;
 const SERVER_HOSTNAME = "localhost";
@@ -10,10 +13,22 @@ const serverConfiguration = {
   hostname: SERVER_HOSTNAME,
 };
 
+// TODO: starkbank.event.parse not working, missing signature verification
 const INVOICE_WEBHOOK_ROUTE = "/invoice-webhook";
 async function invoiceWebhookHandler(req) {
-  await console.log(JSON.stringify(req.body));
-  return new Response("OK");
+  try {
+    const content = await req.json();
+    const event = content.event;
+
+    if (event.log.invoice.status === "paid") {
+      await createTransfer(starkbank, event);
+    }
+
+    return new Response("Ok");
+  } catch (error) {
+    console.log(error);
+    return new Response(400);
+  }
 }
 
 const SET_TIME_PERIOD_ROUTE = "/set-time-period";
@@ -99,7 +114,7 @@ await timePeriodService.set(defaultPeriod);
 
 Deno.cron("Trigger invoice creation", { minute: { every: 1 } }, async () => {
   if (await timePeriodService.isActive()) {
-    await sendInvoices();
+    await sendInvoices(starkbank);
   }
 });
 

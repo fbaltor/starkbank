@@ -7,14 +7,13 @@ export async function initStarkbank() {
 
 const ENV_TYPE_VAR = "ENV_TYPE";
 const PROJECT_ID_VAR = "PROJECT_ID";
-const PRIVATE_KEY_PATH_VAR = "PRIVATE_KEY_PATH";
+const PRIVATE_KEY_VAR = "PRIVATE_KEY";
 
 const env = Deno.env.get(ENV_TYPE_VAR);
 
 const projectId = Deno.env.get(PROJECT_ID_VAR);
 
-const privateKeyPath = Deno.env.get(PRIVATE_KEY_PATH_VAR);
-const privateKey = await Deno.readTextFile(privateKeyPath);
+const privateKey = Deno.env.get(PRIVATE_KEY_VAR);
 
 function authFromEnv(starkbank) {
   const user = new starkbank.Project({
@@ -103,4 +102,42 @@ export function isSetTimePeriodAuth(req) {
   }
 
   return true;
+}
+
+const STARK_BANK_API_URL_VAR = "STARK_BANK_API";
+const STARK_BANK_API_URL = Deno.env.get(STARK_BANK_API_URL_VAR);
+async function getStarkbankPublicKey() {
+  const starkbankPublicKeyUrl = STARK_BANK_API_URL + "/v2/public-key";
+
+  try {
+    const response = await fetch(starkbankPublicKeyUrl);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch public key: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const data = await response.json();
+
+    if (
+      !data.publicKeys ||
+      !Array.isArray(data.publicKeys) ||
+      data.publicKeys.length === 0
+    ) {
+      throw new Error("No public keys found in response");
+    }
+
+    const publicKey = data.publicKeys[0];
+
+    if (!publicKey.content) {
+      throw new Error("Public key content not found");
+    }
+
+    return publicKey.content;
+  } catch (error) {
+    throw new Error(
+      `Error fetching public key: ${error.message || "Unknown error"}`,
+    );
+  }
 }
