@@ -7,7 +7,7 @@ export async function signPayload(payload, timestamp, secret) {
     encoder.encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
 
   const body = typeof payload === "string" ? payload : JSON.stringify(payload);
@@ -15,12 +15,18 @@ export async function signPayload(payload, timestamp, secret) {
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
 
   return Array.from(new Uint8Array(signature))
-    .map(b => b.toString(16).padStart(2, "0"))
+    .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
 /** Verify a request using the shared HMAC secret */
-export async function verifyRequest({ body, timestamp, signature, secret, maxSkewMs = 30000 }) {
+export async function verifyInternalRequest({
+  body,
+  timestamp,
+  signature,
+  secret,
+  maxSkewMs = 30000,
+}) {
   const now = Date.now();
   const tsNum = Number(timestamp);
   if (isNaN(tsNum) || Math.abs(now - tsNum) > maxSkewMs) return false;
@@ -30,12 +36,31 @@ export async function verifyRequest({ body, timestamp, signature, secret, maxSke
     encoder.encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["verify"]
+    ["verify"],
   );
 
   const data = `${timestamp}:${body}`;
-  const sigBytes = Uint8Array.from(signature.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+  const sigBytes = Uint8Array.from(
+    signature.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)),
+  );
 
-  return await crypto.subtle.verify("HMAC", key, sigBytes, encoder.encode(data));
+  return await crypto.subtle.verify(
+    "HMAC",
+    key,
+    sigBytes,
+    encoder.encode(data),
+  );
 }
 
+export async function authInternalRequest(req) {
+  const signature = req.headers.get("X-Signature") || "";
+  const timestamp = req.headers.get("X-Timestamp") || "";
+  const secret = Deno.env.get("API_HMAC_SECRET");
+
+  return await verifyInternalRequest({
+    body: "",
+    timestamp,
+    signature,
+    secret,
+  });
+}

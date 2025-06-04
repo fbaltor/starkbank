@@ -1,27 +1,54 @@
-import { verifyRequest } from "../auth.js";
+import { authInternalRequest } from "../auth.js";
 
-Deno.serve(
+const SERVER_PORT = 8000;
+const SERVER_HOSTNAME = "localhost";
+
+const serverConfiguration = {
+  port: SERVER_PORT,
+  hostname: SERVER_HOSTNAME,
+};
+
+async function sendInvoices() {
+  await console.log("Send invoice triggered!");
+}
+
+const INVOICE_ROUTE = "/invoice";
+async function invoiceHandler(req) {
+  if (!(await authInternalRequest(req))) {
+    return new Response("Unauthorized", { status: 403 });
+  }
+
+  await sendInvoices();
+  return new Response("OK");
+}
+
+const INVOICE_WEBHOOK_ROUTE = "/invoice-webhook";
+async function invoiceWebhookHandler(req) {
+  await console.log(JSON.stringify(req.body));
+  return new Response("OK");
+}
+
+const ROUTES = [
   {
-    port: 8000,
-    hostname: "localhost",
+    pattern: new URLPattern({ pathname: INVOICE_ROUTE }),
+    handler: invoiceHandler,
   },
-  async (req) => {
-    const sig = req.headers.get("X-Signature") || "";
-    const ts = req.headers.get("X-Timestamp") || "";
-    const secret = Deno.env.get("API_HMAC_SECRET");
-
-    const valid = await verifyRequest({
-      body: "",
-      timestamp: ts,
-      signature: sig,
-      secret,
-    });
-
-    if (!valid) return new Response("Unauthorized", { status: 403 });
-
-    // Run your cron-triggered logic here
-    const validMessage = "Cron trigger accepted";
-    console.log(validMessage);
-    return new Response(validMessage);
+  {
+    pattern: new URLPattern({ pathname: INVOICE_WEBHOOK_ROUTE }),
+    handler: invoiceWebhookHandler,
   },
-);
+];
+
+async function handler(req) {
+  const url = new URL(req.url);
+
+  for (const route of ROUTES) {
+    const match = route.pattern.exec(url);
+
+    if (match) {
+      return await route.handler(req);
+    }
+  }
+}
+
+Deno.serve(serverConfiguration, handler);

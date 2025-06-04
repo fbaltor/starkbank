@@ -11,8 +11,10 @@ async function invoiceTrigger() {
 
   const signature = await signPayload("", timestamp, secret);
 
-  const SERVER_URL = "http://localhost:8000";
-  await fetch(SERVER_URL, {
+  const INVOICE_BASE_URL = "http://localhost:8000";
+  const TRIGGER_INVOICE_ROUTE = "/invoice";
+  const TRIGGER_INVOICE_URL = INVOICE_BASE_URL + TRIGGER_INVOICE_ROUTE;
+  await fetch(TRIGGER_INVOICE_URL, {
     method: "POST",
     headers: {
       "X-Signature": signature,
