@@ -1,39 +1,8 @@
-import starkbank from "starkbank";
+import { initStarkbank } from "../auth.js";
 import { NAMES } from "./names.js";
+import { generate as generateCNPJ } from "@tiagoporto/gerador-validador-cnpj";
 
-export async function initStarkbank() {
-  const stark = starkbank;
-
-  return await authFromEnv(stark);
-}
-
-async function authFromEnv(starkbank) {
-  const ENV_TYPE_VAR = "ENV_TYPE";
-  const PROJECT_ID_VAR = "PROJECT_ID";
-  const PRIVATE_KEY_PATH_VAR = "PRIVATE_KEY_PATH";
-
-  const env = Deno.env.get(ENV_TYPE_VAR);
-
-  const projectId = Deno.env.get(PROJECT_ID_VAR);
-
-  const privateKeyPath = Deno.env.get(PRIVATE_KEY_PATH_VAR);
-  const privateKey = await Deno.readTextFile(privateKeyPath);
-
-  const user = new starkbank.Project({
-    environment: env,
-    id: projectId,
-    privateKey: privateKey,
-  });
-
-  starkbank.user = user;
-  return starkbank;
-}
-
-function getRandomCPF() {
-  const n = () => Math.floor(Math.random() * 900 + 100);
-  const d = () => Math.floor(Math.random() * 90 + 10);
-  return `${n()}.${n()}.${n()}-${d()}`;
-}
+const starkbank = await initStarkbank();
 
 function getRandomPersonList(nameArray, min, max) {
   const targetSize = Math.min(
@@ -53,7 +22,7 @@ function getRandomPersonList(nameArray, min, max) {
     let taxId;
     let attempts = 0;
     do {
-      taxId = getRandomCPF();
+      taxId = generateCNPJ();
       attempts++;
       if (attempts > 100) break;
     } while (usedTaxIds.has(taxId));
@@ -89,8 +58,14 @@ function generateRandomInvoicesFromList(personList, min, max) {
 
 function generateRandomInvoices(min, max) {
   const personList = getRandomPersonList(NAMES, min, max);
-
   return generateRandomInvoicesFromList(personList, min, max);
 }
 
-console.log(generateRandomInvoices(1, 10));
+const MIN_INVOICES = 8;
+const MAX_INVOICES = 12;
+export async function sendInvoices() {
+  const invoiceList = generateRandomInvoices(MIN_INVOICES, MAX_INVOICES);
+
+  const invoices = await starkbank.invoice.create(invoiceList);
+  console.log(invoices);
+}

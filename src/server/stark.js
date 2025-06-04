@@ -1,4 +1,4 @@
-import { initStarkbank } from "../utils.js";
+import { initStarkbank } from "../auth.js";
 
 const starkbank = await initStarkbank();
 

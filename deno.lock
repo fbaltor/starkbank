@@ -4,6 +4,7 @@
     "jsr:@noble/secp256k1@^2.2.3": "2.2.3",
     "jsr:@std/assert@1": "1.0.13",
     "jsr:@std/internal@^1.0.6": "1.0.6",
+    "jsr:@tiagoporto/gerador-validador-cnpj@^2.1.0": "2.1.0",
     "npm:starkbank@^2.32.0": "2.32.0"
   },
   "jsr": {
@@ -18,6 +19,9 @@
     },
     "@std/internal@1.0.6": {
       "integrity": "9533b128f230f73bd209408bb07a4b12f8d4255ab2a4d22a1fd6d87304aca9a4"
+    },
+    "@tiagoporto/gerador-validador-cnpj@2.1.0": {
+      "integrity": "ca7c088be35dbe24505e612fc1a31fba6368b6aa00ba458c7be5c963bff1dec7"
     }
   },
   "npm": {
@@ -188,6 +192,7 @@
     "dependencies": [
       "jsr:@noble/secp256k1@^2.2.3",
       "jsr:@std/assert@1",
+      "jsr:@tiagoporto/gerador-validador-cnpj@^2.1.0",
       "npm:starkbank@^2.32.0"
     ]
   }

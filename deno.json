@@ -5,6 +5,7 @@
   "imports": {
     "@noble/secp256k1": "jsr:@noble/secp256k1@^2.2.3",
     "@std/assert": "jsr:@std/assert@1",
+    "@tiagoporto/gerador-validador-cnpj": "jsr:@tiagoporto/gerador-validador-cnpj@^2.1.0",
     "starkbank": "npm:starkbank@^2.32.0"
   }
 }

@@ -1,4 +1,5 @@
 import { authInternalRequest } from "../auth.js";
+import { sendInvoices } from "./invoiceService.js";
 
 const SERVER_PORT = 8000;
 const SERVER_HOSTNAME = "localhost";
@@ -8,17 +9,12 @@ const serverConfiguration = {
   hostname: SERVER_HOSTNAME,
 };
 
-async function sendInvoices() {
-  await console.log("Send invoice triggered!");
-}
-
 const INVOICE_ROUTE = "/invoice";
 async function invoiceHandler(req) {
   if (!(await authInternalRequest(req))) {
     return new Response("Unauthorized", { status: 403 });
   }
 
-  console.log(JSON.stringify(req));
   await sendInvoices();
   return new Response("OK");
 }

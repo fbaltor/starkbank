@@ -1,6 +1,5 @@
 import { signPayload } from "../auth.js";
 
-invoiceTrigger();
 Deno.cron("Trigger invoice creation", { minute: { every: 1 } }, async () => {
   await invoiceTrigger();
 });
