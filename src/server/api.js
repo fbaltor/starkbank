@@ -18,6 +18,7 @@ async function invoiceHandler(req) {
     return new Response("Unauthorized", { status: 403 });
   }
 
+  console.log(JSON.stringify(req));
   await sendInvoices();
   return new Response("OK");
 }
