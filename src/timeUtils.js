@@ -9,7 +9,7 @@ const ACTIVE_PERIOD_KEY = ["active_time_period"];
  */
 export function createTimePeriod(
   startTime = Temporal.Now.instant(),
-  duration = Temporal.Duration.from({ hours: 24 }),
+  duration = Temporal.Duration.from({ seconds: 0 }),
 ) {
   return Object.freeze({
     startTime,

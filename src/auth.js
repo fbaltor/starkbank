@@ -5,18 +5,18 @@ export async function initStarkbank() {
   return await authFromEnv(stark);
 }
 
-async function authFromEnv(starkbank) {
-  const ENV_TYPE_VAR = "ENV_TYPE";
-  const PROJECT_ID_VAR = "PROJECT_ID";
-  const PRIVATE_KEY_PATH_VAR = "PRIVATE_KEY_PATH";
+const ENV_TYPE_VAR = "ENV_TYPE";
+const PROJECT_ID_VAR = "PROJECT_ID";
+const PRIVATE_KEY_PATH_VAR = "PRIVATE_KEY_PATH";
 
-  const env = Deno.env.get(ENV_TYPE_VAR);
+const env = Deno.env.get(ENV_TYPE_VAR);
 
-  const projectId = Deno.env.get(PROJECT_ID_VAR);
+const projectId = Deno.env.get(PROJECT_ID_VAR);
 
-  const privateKeyPath = Deno.env.get(PRIVATE_KEY_PATH_VAR);
-  const privateKey = await Deno.readTextFile(privateKeyPath);
+const privateKeyPath = Deno.env.get(PRIVATE_KEY_PATH_VAR);
+const privateKey = await Deno.readTextFile(privateKeyPath);
 
+function authFromEnv(starkbank) {
   const user = new starkbank.Project({
     environment: env,
     id: projectId,
@@ -92,4 +92,15 @@ export async function authInternalRequest(req) {
     signature,
     secret,
   });
+}
+
+const TIME_PERIOD_API_KEY_VAR = "TIME_PERIOD_API_KEY";
+const TIME_PERIOD_API_KEY = Deno.env.get(TIME_PERIOD_API_KEY_VAR);
+export function isSetTimePeriodAuth(req) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || authHeader !== `Bearer ${TIME_PERIOD_API_KEY}`) {
+    return false;
+  }
+
+  return true;
 }
