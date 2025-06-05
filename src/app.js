@@ -112,7 +112,7 @@ const timePeriodService = createTimePeriodService(kv);
 const defaultPeriod = createTimePeriod();
 await timePeriodService.set(defaultPeriod);
 
-Deno.cron("Trigger invoice creation", { minute: { every: 1 } }, async () => {
+Deno.cron("Trigger invoice creation", { hour: { every: 3 } }, async () => {
   if (await timePeriodService.isActive()) {
     await sendInvoices(starkbank);
   }
