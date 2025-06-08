@@ -1,6 +1,6 @@
 import { sendInvoices } from "./invoiceService.js";
-import { createTimePeriodService, createTimePeriod } from "./timeUtils.js";
-import { initStarkbank, isSetTimePeriodAuth } from "./auth.js";
+import { createTimePeriodService, createTimePeriod } from "./timeService.js";
+import { initStarkbank, isSetTimePeriodAuth } from "./authService.js";
 import { createTransfer } from "./transferService.js";
 
 const starkbank = await initStarkbank();

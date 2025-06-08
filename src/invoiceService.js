@@ -1,4 +1,3 @@
-import { initStarkbank } from "./auth.js";
 import { NAMES } from "./names.js";
 import { generate as generateCNPJ } from "@tiagoporto/gerador-validador-cnpj";
 
